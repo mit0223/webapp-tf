@@ -1,0 +1,54 @@
+# Terraform Core Files
+# ---------------------
+# `terraform init` を実行すると生成されるファイル。
+# プロバイダのプラグインやモジュールが含まれるため、環境ごとに異なる。
+.terraform/
+
+# Terraform State Files
+# ---------------------
+# インフラの状態を記録する最も重要なファイル。
+# !!機密情報が含まれる可能性が非常に高いため、絶対にGitに含めない!!
+# 代わりにS3などのリモートバックエンドを使用することを強く推奨します。
+*.tfstate
+*.tfstate.backup
+
+# Terraform Plan Files
+# ---------------------
+# `terraform plan -out` で生成される実行計画ファイル。
+# これにも機密情報が含まれる可能性がある。
+*.tfplan
+
+# Crash Log Files
+# ---------------------
+# Terraformがクラッシュした際に出力されるログ。
+crash.log
+crash.*.log
+
+# Terraform Cloud/Enterprise credentials
+# ---------------------
+# ローカルのTerraform設定ファイル。認証情報が含まれる。
+.terraformrc
+terraform.rc
+
+# Variable Files
+# ---------------------
+# !!パスワードやAPIキーなどの機密情報を記述することが多いファイル!!
+# デフォルト値を `variables.tf` に記述し、機密情報は環境変数などで渡すのがベストプラクティス。
+*.tfvars
+*.tfvars.json
+
+# Override Files
+# ---------------------
+# ローカル環境でのみ一時的に設定を上書きするためのファイル。
+# チームで共有すべきではない。
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# OS/Editor specific
+# ---------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

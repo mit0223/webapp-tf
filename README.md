@@ -23,17 +23,17 @@ This project is designed to be used with GitHub Codespaces. You need to configur
 
 **Repository Secrets:**
 
-- `AWS_ACCESS_KEY_ID`: Your AWS access key ID.
-- `AWS_SECRET_ACCESS_KEY`: Your AWS secret access key.
+- `LONG_TERM_ACCESS_KEY_ID`: Your AWS access key ID.
+- `LONG_TERM_SECRET_ACCESS_KEY`: Your AWS secret access key.
 - `TF_VAR_mfa_serial`: (Optional but Recommended) The ARN of your MFA device (e.g., `arn:aws:iam::123456789012:mfa/your-username`). If you don't set this, MFA will be skipped if the `mfa_serial` variable in `variables.tf` has an empty default or is not prompted for.
 
 **Repository Variables (for Codespaces):**
 
-- `TF_VAR_aws_account_id`: Your 12-digit AWS Account ID.
-- `TF_VAR_aws_region`: The AWS region where you want to deploy the resources (e.g., `ap-northeast-1`).
-- `TF_VAR_github_repository_owner`: The owner of the GitHub repository where your container image is stored (e.g., your GitHub username or organization name).
-- `TF_VAR_container_image_name`: The name of your container image in GitHub Container Registry (e.g., `my-web-app`). Defaults to `webapp-tf` if not set.
-- `TF_VAR_container_image_tag`: The tag of the container image to deploy (e.g., `latest`, `v1.0.0`). Defaults to `latest` if not set.
+- `TF_VAR_AWS_ACCOUNT_ID`: Your 12-digit AWS Account ID.
+- `TF_VAR_AWS_REGION`: The AWS region where you want to deploy the resources (e.g., `ap-northeast-1`).
+- `TF_VAR_GITHUB_REPOSITORY_OWNER`: The owner of the GitHub repository where your container image is stored (e.g., your GitHub username or organization name).
+- `TF_VAR_CONTAINER_IMAGE_NAME`: The name of your container image in GitHub Container Registry (e.g., `my-web-app`). Defaults to `webapp-tf` if not set.
+- `TF_VAR_CONTAINER_IMAGE_TAG`: The tag of the container image to deploy (e.g., `latest`, `v1.0.0`). Defaults to `latest` if not set.
 
 **Note:** Environment variables prefixed with `TF_VAR_` are automatically picked up by Terraform as input variables.
 
@@ -52,9 +52,10 @@ Once your Codespace is ready and you have configured the secrets and variables:
     If you have configured `TF_VAR_mfa_serial`, you will need to get temporary credentials using your MFA device. Open a terminal in VS Code:
 
     ```bash
-    aws-mfa --profile default --device YOUR_MFA_SERIAL_ARN
+    ./set-credentials.sh
+    aws-mfa --device $TF_VAR_mfa_serial
     ```
-    Replace `YOUR_MFA_SERIAL_ARN` with your actual MFA serial ARN (e.g., `arn:aws:iam::123456789012:mfa/your-username`). You will be prompted to enter your OTP (One-Time Password) from your MFA device. This command will update your `~/.aws/credentials` file with temporary session credentials.
+    Replace `YOUR_mfa_serial_ARN` with your actual MFA serial ARN (e.g., `arn:aws:iam::123456789012:mfa/your-username`). You will be prompted to enter your OTP (One-Time Password) from your MFA device. This command will update your `~/.aws/credentials` file with temporary session credentials.
 
     If you haven't set `TF_VAR_mfa_serial` or the `mfa_serial` variable is empty, Terraform will attempt to authenticate using the configured `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` directly. **This is not recommended for production environments.**
 
@@ -124,7 +125,7 @@ The Terraform AWS provider is configured to assume the IAM role named `CdkDeploy
 provider "aws" {
   # ...
   assume_role {
-    role_arn = "arn:aws:iam::${var.aws_account_id}:role/CdkDeployer"
+    role_arn = "arn:aws:iam::${var.AWS_ACCOUNT_ID}:role/CdkDeployer"
   }
   # ...
 }
@@ -138,7 +139,7 @@ The ECS Task Definition is configured to pull a public container image from GitH
   container_definitions = jsonencode([
     {
       name      = "webapp-tf-container"
-      image     = "ghcr.io/${var.github_repository_owner}/${var.container_image_name}:${var.container_image_tag}"
+      image     = "ghcr.io/${var.GITHUB_REPOSITORY_OWNER}/${var.CONTAINER_IMAGE_NAME}:${var.CONTAINER_IMAGE_TAG}"
       // ...
       portMappings = [
         {
@@ -152,4 +153,4 @@ The ECS Task Definition is configured to pull a public container image from GitH
 Make sure your container image is:
 1. Publicly accessible on `ghcr.io`.
 2. Exposes port `8080` (or update the `containerPort` and target group port accordingly).
-3. The `TF_VAR_github_repository_owner`, `TF_VAR_container_image_name`, and `TF_VAR_container_image_tag` variables are correctly set in your Codespaces settings to point to your image.
+3. The `TF_VAR_GITHUB_REPOSITORY_OWNER`, `TF_VAR_CONTAINER_IMAGE_NAME`, and `TF_VAR_CONTAINER_IMAGE_TAG` variables are correctly set in your Codespaces settings to point to your image.

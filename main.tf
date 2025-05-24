@@ -1,7 +1,7 @@
 provider "aws" {
-  region = var.aws_region
+  region = var.AWS_REGION
   assume_role {
-    role_arn = "arn:aws:iam::${var.aws_account_id}:role/CdkDeployer"
+    role_arn = "arn:aws:iam::${var.AWS_ACCOUNT_ID}:role/CdkDeployer"
   }
   default_tags {
     tags = {
@@ -40,21 +40,21 @@ resource "aws_internet_gateway" "webapp_tf_igw" {
   }
 }
 
-resource "aws_subnet" "webapp_tf_public_subnet_a" {
+resource "aws_subnet" "webapp_tf_public_subnet_c" {
   vpc_id                  = aws_vpc.webapp_tf_vpc.id
   cidr_block              = "10.0.1.0/24"
-  availability_zone       = "${var.aws_region}a"
+  availability_zone       = "${var.AWS_REGION}c"
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "webapp-tf-public-subnet-a"
+    Name = "webapp-tf-public-subnet-c"
   }
 }
 
 resource "aws_subnet" "webapp_tf_public_subnet_b" {
   vpc_id                  = aws_vpc.webapp_tf_vpc.id
   cidr_block              = "10.0.2.0/24"
-  availability_zone       = "${var.aws_region}b"
+  availability_zone       = "${var.AWS_REGION}b"
   map_public_ip_on_launch = true
 
   tags = {
@@ -75,8 +75,8 @@ resource "aws_route_table" "webapp_tf_public_rt" {
   }
 }
 
-resource "aws_route_table_association" "webapp_tf_public_subnet_a_assoc" {
-  subnet_id      = aws_subnet.webapp_tf_public_subnet_a.id
+resource "aws_route_table_association" "webapp_tf_public_subnet_c_assoc" {
+  subnet_id      = aws_subnet.webapp_tf_public_subnet_c.id
   route_table_id = aws_route_table.webapp_tf_public_rt.id
 }
 
@@ -138,7 +138,7 @@ resource "aws_lb" "webapp_tf_alb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.webapp_tf_alb_sg.id]
-  subnets            = [aws_subnet.webapp_tf_public_subnet_a.id, aws_subnet.webapp_tf_public_subnet_b.id]
+  subnets            = [aws_subnet.webapp_tf_public_subnet_c.id, aws_subnet.webapp_tf_public_subnet_b.id]
 
   tags = {
     Name = "webapp-tf-alb"
@@ -198,7 +198,7 @@ resource "aws_ecs_task_definition" "webapp_tf_task" {
   container_definitions = jsonencode([
     {
       name      = "webapp-tf-container"
-      image     = "ghcr.io/${var.github_repository_owner}/${var.container_image_name}:${var.container_image_tag}"
+      image     = "ghcr.io/${var.GITHUB_REPOSITORY_OWNER}/${var.CONTAINER_IMAGE_NAME}:${var.CONTAINER_IMAGE_TAG}"
       cpu       = 256
       memory    = 512
       essential = true
@@ -224,7 +224,7 @@ resource "aws_ecs_service" "webapp_tf_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = [aws_subnet.webapp_tf_public_subnet_a.id, aws_subnet.webapp_tf_public_subnet_b.id]
+    subnets         = [aws_subnet.webapp_tf_public_subnet_c.id, aws_subnet.webapp_tf_public_subnet_b.id]
     security_groups = [aws_security_group.webapp_tf_ecs_service_sg.id]
     assign_public_ip = true
   }

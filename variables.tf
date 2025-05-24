@@ -1,43 +1,43 @@
-variable "aws_account_id" {
+variable "AWS_ACCOUNT_ID" {
   description = "AWS Account ID"
   type        = string
   validation {
-    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
+    condition     = can(regex("^[0-9]{12}$", var.AWS_ACCOUNT_ID))
     error_message = "AWS Account ID must be 12 digits."
   }
 }
 
-variable "aws_region" {
+variable "AWS_REGION" {
   description = "AWS Region"
   type        = string
   default     = "ap-northeast-1"
   validation {
-    condition     = can(regex("^[a-z]{2}-[a-z]+-[0-9]$", var.aws_region))
+    condition     = can(regex("^[a-z]{2}-[a-z]+-[0-9]$", var.AWS_REGION))
     error_message = "Invalid AWS Region format."
   }
 }
 
-variable "container_image_tag" {
+variable "CONTAINER_IMAGE_TAG" {
   description = "Tag of the container image to deploy"
   type        = string
   default     = "latest"
 }
 
-variable "github_repository_owner" {
+variable "GITHUB_REPOSITORY_OWNER" {
   description = "Owner of the GitHub repository where the container image is stored (e.g., your GitHub username or organization name)"
   type        = string
   validation {
-    condition     = length(var.github_repository_owner) > 0
+    condition     = length(var.GITHUB_REPOSITORY_OWNER) > 0
     error_message = "GitHub repository owner must be provided."
   }
 }
 
-variable "container_image_name" {
+variable "CONTAINER_IMAGE_NAME" {
   description = "Name of the container image in GitHub Container Registry"
   type        = string
   default     = "webapp-tf" # デフォルトのイメージ名を指定
    validation {
-    condition     = length(var.container_image_name) > 0
+    condition     = length(var.CONTAINER_IMAGE_NAME) > 0
     error_message = "Container image name must be provided."
   }
 }
